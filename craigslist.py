@@ -42,21 +42,18 @@ class Craigslist:
         import traceback
 
         try:
-            #element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.selector, select)))
             element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.__dict__[selector], select)))
             element.click()
 
         finally:
             pass
 
+
     def checkImageLoad(self,num):
         imageDivContainer = self.driver.find_element_by_xpath('/html/body/article/section/div[2]')
         imglistDiv = imageDivContainer.find_elements_by_tag_name('img')
         if (len(imglistDiv) == num):
             return True
-
-        #predicate = lambda x: if (len(imglistDiv) == x): return True
-
 
 
     def postImages(self,imgNum):
@@ -75,7 +72,7 @@ class Craigslist:
 
     def postBikeSort(self):
         self.bikesortDict = {
-            'id':{'PostingTitle':self.title,'PostingBody':self.description},
+            'id':{'PostingTitle':self.title,'PostingBody':(self.description+ '\n' + ' Come by Ontop Bike Shop 10am-6pm, Tuesday to Sunday! Dont email, please call, Thanks! \n*OntopAutoAdd v.1.0*')},
             'name':{'price':self.price,'geographic_area':'North Vancouver','postal':'V7N 3J6','bicycle_frame_size_freeform':self.framesize,'sale_manufacturer':self.brand,'sale_model':self.model},
             'links':{'ui-id-1-button':self.biketype,'ui-id-2-button':self.frameMaterial,'ui-id-3-button':self.wheelSize,'ui-id-4-button':self.suspension,'ui-id-5-button':self.brakeType,'ui-id-6-button':self.handlebarType,'ui-id-7-button':self.electricAssist,'ui-id-8-button':self.condition}
         }
@@ -92,7 +89,7 @@ class Craigslist:
         self.driver.find_element_by_xpath('//*[@id="new-edit"]/div/label/label[10]/input').click()
         bikeIDdict = self.postBikeSort().get('id')
         bikeNAMEdict = self.postBikeSort().get('name')
-        partLinks = {'ui-id-2-button':self.partType,'ui-id-3-button':self.condition}
+        partLinks = {'ui-id-1-button':self.partType,'ui-id-2-button':self.condition}
         for x in bikeIDdict:
             self.driver.find_element_by_id(x).send_keys(bikeIDdict[x])
 
@@ -104,10 +101,11 @@ class Craigslist:
 
         for y in partLinks:
             self.driver.find_element_by_id(y).click()
-
-            for p in self.driver.find_elements_by_tag_name('li'):
-                if p.text == partLinks[y]:
+            for p in self.driver.find_elements_by_class_name('ui-menu-item'):
+                print(p.text)
+                if p.text == str(partLinks[y]):
                     p.click()
+
         self.driver.find_element_by_name('show_phone_ok').click()
         self.driver.find_element_by_name('contact_phone').send_keys('604-990-9550')
         self.driver.find_element_by_name('show_address_ok').click()
@@ -115,9 +113,10 @@ class Craigslist:
         self.driver.find_element_by_name('go').click()
         self.waitTry('XPATH', '//*[@id="leafletForm"]/button')
 
-        for x in images:
-            self.driver.find_element_by_tag_name('input').send_keys(os.getcwd()+images[x])
-        self.postImages(len(images))
+        for x in self.images:
+            time.sleep(1)
+            self.driver.find_element_by_tag_name('input').send_keys(x)
+        self.postImages(len(self.images))
         self.waitTry('NAME','go')
 
 
@@ -137,7 +136,7 @@ class Craigslist:
         for y in bikeLINKdict:
             self.driver.find_element_by_id(y).click()
             print(bikeLINKdict[y])
-            for p in self.driver.find_elements_by_tag_name('li'):
+            for p in self.driver.find_elements_by_class_name('ui-menu-item'):
                print(p.text)
                if p.text == bikeLINKdict[y]:
                    p.click()
@@ -146,16 +145,13 @@ class Craigslist:
         self.driver.find_element_by_name('show_address_ok').click()
         self.driver.find_element_by_name('xstreet0').send_keys('3051 Lonsdale Avenue')
         self.driver.find_element_by_name('go').click()
-        #driver.find_element_by_class('continue bigbutton').click()
+
         self.waitTry('XPATH', '//*[@id="leafletForm"]/button')
         time.sleep(1)
         for x in self.images:
             self.driver.find_element_by_tag_name('input').send_keys(x)
         self.postImages(len(self.images))
         self.waitTry('NAME','go')
-        #self.driver.find_element_by_name('go').click()
-        # self.waitTry('NAME','go')
-        # self.waitTry('NAME','go')
 
     def run(self):
         self.login()
